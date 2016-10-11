@@ -11,7 +11,7 @@ int main(){
   printf("Point Num? %d\n",Point_Num);
   create_grid(Point_Num);
 
-  
-  pathplan();
+  Goal_ID = get_goal();
+  pathplan(Goal_ID);
   return 0;
 }
