@@ -4,7 +4,7 @@ int read_data(){
 
   int i=0;
   FILE *fp;
-  float x0,y0,z0;
+  float x0,y0,z0,a0,b0;
 
 
   if((fp = fopen("data3D.txt","r")) == NULL){
@@ -13,12 +13,12 @@ int read_data(){
   }
   
   while(feof(fp)==0){
-    fscanf(fp,"%f\t%f\t%f",&x0,&y0,&z0);
+    fscanf(fp,"%f\t%f\t%f\t%f\t%f",&x0,&y0,&z0,&a0,&b0);
     x0 = 0.001 * x0;
     y0 = 0.001 * y0;
     z0 = 0.001 * z0;
     if(z0 < h_limit && -h_limit < z0 && x0*x0 + y0*y0 < dist_limit * dist_limit && 0 <= x0){
-      printf("%f\t%f\n",x0,y0);
+      // printf("%f\t%f\n",x0,y0);
       
       vertex[i][0] = x0;
       vertex[i][1] = y0;
@@ -27,6 +27,7 @@ int read_data(){
     }
   }
   fclose(fp);
+  printf("%f\t%f\n",vertex[i-1][0],vertex[i-1][1]);
   // printf("%d\n",i);
   //feofが一行多く読み込んでしまう．最後の行でx0が負の時，Point_Numに影響がでる
   if(x0 > 0)
@@ -60,9 +61,9 @@ void create_grid(int Point_Num){
   for(i=0;i<Point_Num;i++){
     tmp_x =  vertex[i][0]/grid_interval;
     tmp_y =  vertex[i][1]/grid_interval - 1;
-    printf("%d,%d\t",tmp_x,tmp_y);
+    //printf("%d,%d\t",tmp_x,tmp_y);
     dem_ID =  16 + tmp_y + tmp_x*32;
-    printf("%d\n",dem_ID);
+    //printf("%d\n",dem_ID);
 
     if(dem[dem_ID][2]<vertex[i][2])
       dem[dem_ID][2] = vertex[i][2];
@@ -74,5 +75,9 @@ void create_grid(int Point_Num){
   //   i+1   i   i-1
   //        i-32
   //----------------------
-  
+  for(i=0;i<512;i++){
+    if(dem[i][2] > dem_h_limit){
+      
+    }
+  }
 }
