@@ -11,5 +11,7 @@ float lrf_heigt = 0;
 int Point_Num;
 int Goal_ID;
 int PATH[100];
-
+int Ex_dem[512];
+int Num_ex_dem;
+int Grid_Num = 512;
 #endif

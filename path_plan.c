@@ -9,8 +9,11 @@ int get_goal(){
 }
 
 void pathplan(int Goal_ID){
-
-  float cost;
-  
+  int i;
+  float cost[Grid_Num][Grid_Num];
+  for(i=0;i<Grid_Num;i++){
+    
+  }
   
 }
+

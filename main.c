@@ -9,8 +9,16 @@ int main(){
   
   Point_Num = read_data();
   printf("Point Num? %d\n",Point_Num);
-  create_grid(Point_Num);
-
+  Num_ex_dem = create_grid(Point_Num,dem_h_limit);
+  printf("%d\n",Num_ex_dem);
+ 
+  if(Num_ex_dem>256)
+    Num_ex_dem = create_grid(Point_Num,dem_h_limit+0.1);
+  if(Num_ex_dem>256){
+    printf("can not traverse, back and rescan \n");
+    exit(1);
+  }
+  
   Goal_ID = get_goal();
   pathplan(Goal_ID);
   return 0;
