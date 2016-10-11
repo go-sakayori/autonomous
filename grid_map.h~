@@ -1,8 +1,0 @@
-#ifndef GRID_MAP_H
-#define GRID_MAP_H
-
-void read_data();
-
-void create_grid();
-
-#endif
