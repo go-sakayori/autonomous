@@ -8,9 +8,10 @@ extern float lrf_heigt;
 extern float vertex[][3];
 extern float dem[][3];
 extern float dist_limit;
-extern float dem_h_limit;
+extern int Ex_dem[512];
+extern int Grid_Num;
 int read_data();
 
-void create_grid(int);
+int create_grid(int, float);
 
 #endif
