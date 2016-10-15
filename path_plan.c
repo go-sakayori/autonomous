@@ -4,7 +4,7 @@
 
 int get_goal(){
   int i;
-  i=100;
+  i=15;
   return i; 
   
 }
@@ -19,18 +19,25 @@ void pathplan(int Goal_ID){
   int min;
   int tmp_next;
   float tmp;
-  
-  cost[15] = calc_cost(1,15);
-  cost[16] = calc_cost(1,16);
 
+  //set start node
+  dem[513][0] = 0;
+  dem[513][1] = 0;
+  dem[513][2] = 0;
+
+  //check near node from start
+  cost[15] = calc_cost(513,15);
+  cost[16] = calc_cost(513,16);
+  printf("%d\n",Goal_ID);
   if(cost[15]<cost[16])
     now = 15;
   else
     now = 16;
-  do {
+  printf("%d\n",now);
+  while( now != Goal_ID );{
     min = 12345678;
     next = -1;
-
+    
     //-------------------
     // +33    +32    +31
     // +1     now    -1
@@ -69,8 +76,8 @@ void pathplan(int Goal_ID){
     }
     
     now = tmp_next;
-    
-  } while( now != Goal_ID );
+    printf("%d\n",now);
+  } 
 
   //get path node
   

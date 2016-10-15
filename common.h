@@ -3,7 +3,7 @@
 
 
 float vertex[50000*10][3];
-float dem[512][3];
+float dem[513][3];
 float h_limit = 3;
 float dem_h_limit = 0.05;
 float dist_limit = 8;

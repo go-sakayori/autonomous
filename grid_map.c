@@ -69,10 +69,12 @@ int create_grid(int Point_Num, float dem_h_limit){
     if(fabs(dem[dem_ID][2]) < fabs(vertex[i][2]))
       dem[dem_ID][2] = vertex[i][2];
   }
-  for(i=0;i<Grid_Num;i++){
+
+  // when there is no point cloud in a grid
+  /* for(i=0;i<Grid_Num;i++){
     if(dem[i][2]==0.0)
       dem[i][2] = 123456789;
-  }
+      }*/
   //printf("ok\n");
   //traverse or not for dem_ID
   //---------------------
