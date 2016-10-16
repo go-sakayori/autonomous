@@ -2,17 +2,21 @@
 #define LIMIT 12345678
 #define N_dist 0.5/sqrt(2)
 
-int get_goal(){
+int get_goal(DEM *dem){
   int i;
-  i=15;
+  i=48;
+  if((dem + i)->flag==false)
+    i = i + 1;
+  if((dem + i)->flag==false)
+    i = i - 2;
   return i; 
   
 }
 
-void pathplan(int Goal_ID){
+void pathplan(int Goal_ID,DEM * dem){
 
-  float cost[Grid_Num];
-  int prev[Grid_Num];
+  float cost[512];
+  int prev[512];
   int i,j;
   int next;
   int now;
@@ -21,20 +25,25 @@ void pathplan(int Goal_ID){
   float tmp;
 
   //set start node
-  dem[513][0] = 0;
-  dem[513][1] = 0;
-  dem[513][2] = 0;
-
+  (dem + 512)->x = 0.0;
+  (dem + 512)->y = 0.0;
+  (dem + 512)->z = 0.0;
+  (dem + 512)->flag = true;
+  
   //check near node from start
-  cost[15] = calc_cost(513,15);
-  cost[16] = calc_cost(513,16);
-  printf("%d\n",Goal_ID);
+  cost[15] = calc_cost(513,15,dem);
+  cost[16] = calc_cost(513,16,dem);
+  //printf("%d\n",Goal_ID);
   if(cost[15]<cost[16])
-    now = 15;
+    tmp_next = 15;
   else
-    now = 16;
-  printf("%d\n",now);
-  while( now != Goal_ID );{
+    tmp_next = 16;
+  //  printf("%d\n",now);
+  
+  now = tmp_next;
+  prev[now] = 512;
+  //printf("%d\n",now);
+  while( now != Goal_ID ){
     min = 12345678;
     next = -1;
     
@@ -63,8 +72,9 @@ void pathplan(int Goal_ID){
         next = now - 33;
       if (next<0 || next>511)
         continue;
-      
-      tmp = calc_cost(now,next);
+      if((dem + next)->flag==false)
+        continue;
+      tmp = calc_cost(now,next,dem);
       if(cost[now] + tmp < cost[next]){
         cost[next] = cost[now] + tmp;
         prev[next] = now;
@@ -74,39 +84,47 @@ void pathplan(int Goal_ID){
         tmp_next = next;
       }
     }
-    
+    if(now == tmp_next ){
+      printf("%d\n",now);
+      printf("path plan is failed\n");
+      exit(0);
+    }
+    prev[tmp_next] = now;
     now = tmp_next;
-    printf("%d\n",now);
+    
   } 
-
-  //get path node
-  
+  i = Goal_ID;
+  //get path node 
+  do{
+    printf("iの前は%d\n",prev[i]);
+    i = prev[i];
+  }while(i!= 512);
   
 }
 
-float calc_dist(int a ,int b){
+float calc_dist(int a ,int b,DEM *dem){
   float dist;
-  dist = sqrtf((dem[a][0] - dem[b][0])*(dem[a][0] - dem[b][0]) + (dem[a][1] - dem[b][1])*
-               (dem[a][1] - dem[b][1]));
+  dist = sqrtf(((dem + a)->x - (dem + b)->x)*((dem + a)->x - (dem + b)->x)
+               + ((dem + a)->y - (dem + b)->y)*((dem + a)->y - (dem + b)->y));
   return dist;
 
 }
 
 
-float calc_elev(int a ,int b){
+float calc_elev(int a ,int b,DEM *dem){
   float pitch;
 
-  pitch = atan2f((dem[b][2] - dem[a][2]),
-                 sqrtf((dem[a][0] - dem[b][0])*(dem[a][0] - dem[b][0]) +
-                       (dem[a][1] - dem[b][1])*(dem[a][1] - dem[b][1])));
+  pitch = atan2f(((dem + b)->z - (dem + a)->z),
+                 sqrtf(((dem + a)->x - (dem + b)->x)*((dem + a)->x - (dem + b)->x)
+                       + ((dem + a)->y - (dem + b)->y)*((dem + a)->y - (dem + b)->y)));
 
   return pitch * 180 / (atan(1.0) * 4.0);
 }
 
-float calc_cost(int a ,int b){
+float calc_cost(int a ,int b,DEM *dem){
   float cost;
   
-  cost = calc_dist(a,b)/N_dist + calc_elev(a,b)/5;
+  cost = calc_dist(a,b,dem)/N_dist + calc_elev(a,b,dem)/5;
   
   return cost;
   

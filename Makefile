@@ -5,7 +5,11 @@ WARN = -Wall
 
 #LDLIBS =  -lglui -lglut -lGLU -lGL -lXmu -lXi -lXext -lX11 -lGLEW -lm -pthread
 
-OBJ = main.o path_plan.o grid_map.o #matrix.o #socket_gen.o
+OBJ = \
+	main.o \
+	grid_map.o \
+	path_plan.o \
+	#matrix.o #socket_gen.o
 DEFINES =
 
 CFLAGS = $(WARN) $(DEFINES) 
