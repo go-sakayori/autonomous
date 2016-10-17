@@ -26,7 +26,7 @@ int main(){
     else
       printf("%d",(dem + i)->flag);
   
-  Goal_ID = get_goal(dem);
-  pathplan(Goal_ID,dem);
+  //Goal_ID = get_goal(dem);
+  //pathplan(Goal_ID,dem);
   return 0;
 }

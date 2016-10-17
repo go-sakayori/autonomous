@@ -47,7 +47,7 @@ int create_grid(int Point_Num, DEM *dem){
       (dem + i * 32 + j)->x = INTERVAL / 2 + i * INTERVAL;
       (dem + i * 32 + j)->y = INTERVAL / 2 + (j-16) * INTERVAL;
       (dem + i * 32 + j)->z = 0.0;
-      (dem + i * 32 + j)->flag = true;
+      (dem + i * 32 + j)->flag = 1;
     }
   }
   
@@ -76,39 +76,102 @@ int create_grid(int Point_Num, DEM *dem){
   //----------------------
   j = 0;
   for(i = 0; i < GRID_NUM; i++){
-    if(fabs((dem + i)->z) > DEM_H || (dem + i)->z == 0.0){      //exclude dem over DEM_H or when there is no point cloud in a grid
-      j++;
-      (dem + i)->flag = false;
-      if(i % 32 ==0){ //right area
-        (dem + i + 1)->flag = false;
-        if(i / 32 == 0) //bottom area
-          (dem + i + 32)->flag = false;
-        else if(i / 32 == 15) //top area
-          (dem + i - 32)->flag = false;
-        else{
-          (dem + i + 32)->flag = false;
-          (dem + i - 32)->flag = false;
-        }
+    if(i % 32 == 0){//right area
+      if(i / 32 == 0){ //bottom area
+	if(fabs((dem + i)->z) > DEM_H || (dem + i)->z == 0.0){
+	  (dem + i)->flag = 0;
+	  (dem + i + 1)->flag = 0;
+	  (dem + i + 32)->flag = 0;
+	}
+	else 
+	  (dem + i)->flag = 24;
       }
-      else if (i % 32 == 31){//left area
-        (dem + i - 1)->flag = false;
-        if(i / 32 == 0) //bottom area
-          (dem + i + 32)->flag = false;
-        else if(i / 32 == 15) //top area
-          (dem + i - 32)->flag = false;
-        else{
-          (dem + i + 32)->flag = false;
-          (dem + i - 32)->flag = false;
-        }
+      else if(i / 32 == 15){ //top area
+	if(fabs((dem + i)->z) > DEM_H || (dem + i)->z == 0.0){
+	  (dem + i)->flag = 0;
+	  (dem + i + 1)->flag = 0;
+	  (dem + i - 32)->flag = 0;
+	}
+	else 
+	  (dem + i)->flag = 25;
       }
-      else{
-        (dem + i - 1)->flag = false;	
-        (dem + i + 1)->flag = false;	
-        (dem + i - 32)->flag = false;	
-        (dem + i + 32)->flag = false;	
+      else{ //not right-top or right-bottom
+	if(fabs((dem + i)->z) > DEM_H || (dem + i)->z == 0.0){
+	  (dem + i)->flag = 0;
+	  (dem + i + 1)->flag = 0;
+	  (dem + i - 32)->flag = 0;
+	  (dem + i + 32)->flag = 0;
+	}
+	else if((dem + i)->flag != 0)
+	  (dem + i)->flag = 2;
+	else ;
       }
     }
-    else ;
+
+    else if(i % 32 == 31){//left area
+      if(i / 32 == 0){ //bottom area
+	if(fabs((dem + i)->z) > DEM_H || (dem + i)->z == 0.0){
+	  (dem + i)->flag = 0;
+	  (dem + i - 1)->flag = 0;
+	  (dem + i + 32)->flag = 0;
+	}
+	else 
+	  (dem + i)->flag = 34;
+      }
+      else if(i / 32 == 15){ //top area
+	if(fabs((dem + i)->z) > DEM_H || (dem + i)->z == 0.0){
+	  (dem + i)->flag = 0;
+	  (dem + i - 1)->flag = 0;
+	  (dem + i - 32)->flag = 0;
+	}
+	else 
+	  (dem + i)->flag = 35;
+      }
+      else{ //not left-top or left-bottom
+	if(fabs((dem + i)->z) > DEM_H || (dem + i)->z == 0.0){
+	  (dem + i)->flag = 0;
+	  (dem + i - 1)->flag = 0;
+	  (dem + i - 32)->flag = 0;
+	  (dem + i + 32)->flag = 0;
+	}
+	else if((dem + i)->flag != 0)
+	  (dem + i)->flag = 3;
+	else ;
+      }
+    }
+
+
+    else if(i / 32 == 0){ //bottom area
+      if(fabs((dem + i)->z) > DEM_H || (dem + i)->z == 0.0){
+	(dem + i)->flag = 0;
+	(dem + i - 1)->flag = 0;
+	(dem + i + 1)->flag = 0;
+	(dem + i + 32)->flag = 0;
+      }
+      else
+	(dem + i)->flag = 4;
+    }
+
+    else if(i / 32 == 15){ //top area
+      if(fabs((dem + i)->z) > DEM_H || (dem + i)->z == 0.0){
+	(dem + i)->flag = 0;
+	(dem + i - 1)->flag = 0;
+	(dem + i + 1)->flag = 0;
+	(dem + i - 32)->flag = 0;
+      }
+      else
+	(dem + i)->flag = 5;
+    }
+    else
+      if(fabs((dem + i)->z) > DEM_H || (dem + i)->z == 0.0){
+	(dem + i)->flag = 0;
+	(dem + i + 1)->flag = 0;
+	(dem + i - 1)->flag = 0;
+	(dem + i - 32)->flag = 0;
+	(dem + i + 32)->flag = 0;
+      }
+      else ;
   }
-  return j;
+    return 0;      
 }
+  
