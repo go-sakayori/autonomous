@@ -2,6 +2,7 @@
 #define COMMON_H
 
 float vertex[50000*10][3];
+
 float h_limit = 3;
 float dist_limit = 8;
 float lrf_heigt = 0;

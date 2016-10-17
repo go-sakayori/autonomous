@@ -1,17 +1,18 @@
 #ifndef PATH_PLAN_H
 #define PATH_PLAN_H
 #include <math.h>
+#include <stdio.h>
+#include "grid_map.h"
 
 extern int PATH[100];
-extern int Grid_Num;
-extern float dem[][3];
-int get_goal();
 
-void pathplan(int);
+int get_goal(DEM *);
 
-float calc_dist(int,int);
+void pathplan(int,DEM *);
 
-float calc_elev(int,int);
+float calc_dist(int,int,DEM *);
 
-float calc_cost(int,int);
+float calc_elev(int,int,DEM *);
+
+float calc_cost(int,int,DEM *);
 #endif
