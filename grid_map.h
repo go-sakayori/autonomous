@@ -15,7 +15,7 @@ typedef struct{
   float y;
   float z;
   int flag; //obstacle 0, traverse 1, right 2, left 3, bottom 4, top 5
-  bool status; //false for close, true for open 
+  int status; //0 for close, 1 for open, 2 for unopened 
   float cost;
   int prev;
 } DEM;
