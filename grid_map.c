@@ -34,6 +34,7 @@ int create_grid(int Point_Num, DEM *dem){
   int i, j;
   int tmp_x,tmp_y;
   int dem_ID;
+
   //----------------
   //            x,i=15
   //             |
@@ -48,7 +49,7 @@ int create_grid(int Point_Num, DEM *dem){
       (dem + i * 32 + j)->y = INTERVAL / 2 + (j-16) * INTERVAL;
       (dem + i * 32 + j)->z = 0.0;
       (dem + i * 32 + j)->flag = 1;
-      (dem + i * 32 + j)->cost = 12345678;
+      (dem + i * 32 + j)->cost = 999;
     }
   }
   
@@ -75,7 +76,7 @@ int create_grid(int Point_Num, DEM *dem){
   //   i+1   i   i-1
   //        i-32
   //----------------------
-  j = 0;
+
   for(i = 0; i < GRID_NUM; i++){
     if(i % 32 == 0){//right area
       if(i / 32 == 0){ //bottom area
@@ -163,7 +164,7 @@ int create_grid(int Point_Num, DEM *dem){
       else
 	(dem + i)->flag = 5;
     }
-    else
+    else{
       if(fabs((dem + i)->z) > DEM_H || (dem + i)->z == 0.0){
 	(dem + i)->flag = 0;
 	(dem + i + 1)->flag = 0;
@@ -172,8 +173,8 @@ int create_grid(int Point_Num, DEM *dem){
 	(dem + i + 32)->flag = 0;
       }
       else ;
+    }
   }
-  printf("OK");
-    return 0;      
+  return 0;      
 }
   

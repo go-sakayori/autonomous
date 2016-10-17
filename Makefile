@@ -1,7 +1,7 @@
 # Makefile for GLUT
 
 CC = g++
-WARN = -Wall
+WARN = -Wall -g
 
 #LDLIBS =  -lglui -lglut -lGLU -lGL -lXmu -lXi -lXext -lX11 -lGLEW -lm -pthread
 
