@@ -4,7 +4,7 @@
 
 int get_goal(DEM *dem){
   int i;
-  i=498;
+  i=508;
   
   if((dem + i)->flag ==0)
     i = i + 1;
@@ -206,6 +206,7 @@ void pathplan(int Goal_ID, DEM * dem){
   goal_path = now;
   do{
     printf("%d\n",goal_path);
+    (dem + goal_path)->flag = 6;
     goal_path = (dem + goal_path)->prev;
   }while(goal_path != 512);
   

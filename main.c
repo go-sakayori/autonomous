@@ -20,14 +20,15 @@ int main(){
     exit(1);
     }*/
   //printf("%d\n",Num_ex_dem);
-  
-  for(i=0;i<512;i++)
-    if(i%32==31 && i!=0)
+
+  Goal_ID = get_goal(dem);
+  pathplan(Goal_ID,dem);  
+
+  for(i=512;i>0;i--)
+    if(i % 32==0 && i != 512)
       printf("%d\n",(dem + i)->flag);
     else
       printf("%d",(dem + i)->flag);
   
-  Goal_ID = get_goal(dem);
-  pathplan(Goal_ID,dem);
   return 0;
 }
