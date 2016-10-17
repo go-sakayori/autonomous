@@ -14,10 +14,9 @@ typedef struct{
   float x;
   float y;
   float z;
-  int flag; //obstacle 0, OK 1, right 2, left 3, bottom 4, top 5
+  int flag; //obstacle 0, traverse 1, right 2, left 3, bottom 4, top 5
   bool status; //false for close, true for open 
   float cost;
-  float score;
   int prev;
 } DEM;
 

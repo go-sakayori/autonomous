@@ -14,17 +14,22 @@ int get_goal(DEM *dem){
 }
 
 void pathplan(int Goal_ID,DEM * dem){
-  float cost[512];
-  int prev[512];
-  int i,j, a;
-  int next;
-  int now;
-  int min;
-  int tmp_next;
-  float tmp;
+  int adjacent1[8]={-33, -32, -31, -1, 1, 31, 32, 33};
+  int adjacent2[5]={-32, -31, 1, 32, 33};
+  int adjacent3[5]={-33, -32, -1, 31, 32};
+  int adjacent4[5]={-1, 1, 31, 32, 33};
+  int adjacent5[5]={-1, 1, -31, -32, -33};
+  int adjacent24[3]={1, 32, 33};
+  int adjacent25[3]={1, -31, -32};
+  int adjacent34[3]={-1, 31, 32};
+  int adjacent35[3]={-1, -32, -33};
 
-  for(i=0; i<512; i++)//initialize cost
-    cost[i]=LIMIT;
+
+
+  int i, a, tmp_node;
+  float tmp[8];
+  int goal_path;
+  int now;
 
   //set start node
   (dem + 512)->x = 0.0;
@@ -32,23 +37,22 @@ void pathplan(int Goal_ID,DEM * dem){
   (dem + 512)->z = 0.0;
   (dem + 512)->flag = 1;
   (dem + 512)->status = true; //open start node
-  (dem + 512)->score = calc_dist(512, Goal_ID, dem);
   
   //check near node from start
   if((dem + 15)->flag == 1){
     (dem + 15)->status = true; //open node
-    (dem + 15)->cost = calc_edge(512, 15, dem);
-    (dem + 15)->score = (dem + 15)->cost + calc_dist(15, Goal_ID, dem); //distance as heuristic function
+    (dem + 15)->cost = calc_edge(512, 15, dem) + calc_dist(15, Goal_ID, dem);
   }
-if((dem + 16)->flag == 1){
+
+  if((dem + 16)->flag == 1){
     (dem + 15)->status = true; //open node
-    (dem + 16)->cost = calc_edge(512, 16, dem);
-    (dem + 16)->score = (dem + 16)->cost + calc_dist(16, Goal_ID, dem); //distance as heuristic function
-  }
+    (dem + 16)->cost = calc_edge(512, 16, dem) + calc_dist(16, Goal_ID, dem);
+     }
+
  if((dem + 16)->flag == 0 && (dem + 16)->flag == 0)
     printf("Cannnot move from start position");
 
-  if((dem + 15)->score < (dem + 16)->score){
+  if((dem + 15)->cost < (dem + 16)->cost){
     now = 15;
     (dem + now)->prev = 512;
   }
@@ -57,260 +61,190 @@ if((dem + 16)->flag == 1){
     (dem + now)->prev = 512;
   }
   (dem + 512)->status = false; //close start node  
-  //now = tmp_next;
-  //prev[now] = 512;
 
   while( now != Goal_ID ){
-    min = 12345678;
-    next = -1;
-    
     a = (dem + now)->flag;
     switch (a){
-    case 1:
-      (dem + now - 1)->status = (dem + now + 1)->status = (dem + now - 33)->status = (dem + now - 32)->status = (dem + now - 31)->status = (dem + now + 31)->status = (dem + now + 32)->status = (dem + now + 33)->status = true;
-
-      (dem + now - 1)->cost = calc_edge(now, now - 1, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now + 1)->cost = calc_edge(now, now + 1, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now - 31)->cost = calc_edge(now, now - 31, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now - 32)->cost = calc_edge(now, now - 32, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now - 33)->cost = calc_edge(now, now - 33, dem) +(dem + (dem + now)->prev)->cost;
-      (dem + now + 31)->cost = calc_edge(now, now + 31, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now + 32)->cost = calc_edge(now, now + 32, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now + 33)->cost = calc_edge(now, now + 33, dem) + (dem + (dem + now)->prev)->cost;
-
-      (dem + now - 1)->score = (dem + now - 1)->cost + calc_dist(Goal_ID, now - 1, dem);
-      (dem + now + 1)->score = (dem + now + 1)->cost + calc_dist(Goal_ID, now + 1, dem);
-      (dem + now - 31)->score = (dem + now - 31)->cost + calc_dist(Goal_ID, now - 31, dem);
-      (dem + now - 32)->score = (dem + now - 32)->cost + calc_dist(Goal_ID, now - 32, dem);
-      (dem + now - 33)->score = (dem + now - 33)->cost + calc_dist(Goal_ID, now - 33, dem);
-      (dem + now + 31)->score = (dem + now + 31)->cost + calc_dist(Goal_ID, now + 31, dem);
-      (dem + now + 32)->score = (dem + now + 32)->cost + calc_dist(Goal_ID, now + 32, dem);
-      (dem + now + 33)->score = (dem + now + 33)->cost + calc_dist(Goal_ID, now + 33, dem);
-
+    case 0:
       (dem + now)->status = false; //close now node
-      min = min_node(now+1, now -1, now - 31, now -32, now - 33, now + 31, now + 32, now + 33, dem); //calculate minimum score
-      (dem + min)->prev = now; //path
-      now = min; //next node
+
+      break;
+
+    case 1:
+      for(i=0; i<(int)sizeof(adjacent1); i++){
+	tmp[i] = calc_cost(now, adjacent1[i], Goal_ID, dem);
+	if(tmp[i] < (dem + now + adjacent1[i])->cost){
+	  (dem + now + adjacent1[i])->status = true;
+	  (dem + now + adjacent1[i])->cost = tmp[i];
+	  (dem + now + adjacent1[i])->prev = now;
+	}
+	else ;
+      }
+
+
+      tmp_node = sort_open(dem);
+      (dem + tmp_node)->prev = now; //path
+      (dem + now)->status = false; //close now node
+      now = tmp_node;
+
+      break;
 
     case 2:
-      (dem + now + 1)->status = (dem + now - 32)->status = (dem + now - 31)->status = (dem + now + 32)->status = (dem + now + 33)->status = true;
+      for(i=0; i<(int)sizeof(adjacent2); i++){
+	tmp[i] = calc_cost(now, adjacent2[i], Goal_ID, dem);
+	if(tmp[i] < (dem + now + adjacent2[i])->cost){
+	  (dem + now + adjacent2[i])->status = true;
+	  (dem + now + adjacent2[i])->cost = tmp[i];
+	  (dem + now + adjacent2[i])->prev = now;
+	}
+	else ;
+      }
 
-      (dem + now + 1)->cost = calc_edge(now, now + 1, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now - 31)->cost = calc_edge(now, now - 31, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now - 32)->cost = calc_edge(now, now - 32, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now + 32)->cost = calc_edge(now, now + 32, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now + 33)->cost = calc_edge(now, now + 33, dem) + (dem + (dem + now)->prev)->cost;
+      tmp_node = sort_open(dem);
+      (dem + tmp_node)->prev = now; //path
+      (dem + now)->status = false; //close now node
+      now = tmp_node;
 
-      (dem + now + 1)->score = (dem + now + 1)->cost + calc_dist(Goal_ID, now + 1, dem);
-      (dem + now - 31)->score = (dem + now - 31)->cost + calc_dist(Goal_ID, now - 31, dem);
-      (dem + now - 32)->score = (dem + now - 32)->cost + calc_dist(Goal_ID, now - 32, dem);
-      (dem + now + 32)->score = (dem + now + 32)->cost + calc_dist(Goal_ID, now + 32, dem);
-      (dem + now + 33)->score = (dem + now + 33)->cost + calc_dist(Goal_ID, now + 33, dem);
+      break;
 
     case 3:
-      (dem + now - 1)->status = (dem + now - 33)->status = (dem + now - 32)->status = (dem + now + 31)->status = (dem + now + 32)->status = true;
+      for(i=0; i<(int)sizeof(adjacent3); i++){
+	tmp[i] = calc_cost(now, adjacent3[i], Goal_ID, dem);
+	if(tmp[i] < (dem + now + adjacent3[i])->cost){
+	  (dem + now + adjacent3[i])->status = true;
+	  (dem + now + adjacent3[i])->cost = tmp[i];
+	  (dem + now + adjacent3[i])->prev = now;
+	}
+	else ;
+      }
 
-      (dem + now - 1)->cost = calc_edge(now, now - 1, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now + 1)->cost = calc_edge(now, now + 1, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now - 31)->cost = calc_edge(now, now - 31, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now - 32)->cost = calc_edge(now, now - 32, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now - 33)->cost = calc_edge(now, now - 33, dem) +(dem + (dem + now)->prev)->cost;
-      (dem + now + 31)->cost = calc_edge(now, now + 31, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now + 32)->cost = calc_edge(now, now + 32, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now + 33)->cost = calc_edge(now, now + 33, dem) + (dem + (dem + now)->prev)->cost;
+      tmp_node = sort_open(dem);
+      (dem + tmp_node)->prev = now; //path
+      (dem + now)->status = false; //close now node
+      now = tmp_node;
 
-      (dem + now - 1)->score = (dem + now - 1)->cost + calc_dist(Goal_ID, now - 1, dem);
-      (dem + now + 1)->score = (dem + now + 1)->cost + calc_dist(Goal_ID, now + 1, dem);
-      (dem + now - 31)->score = (dem + now - 31)->cost + calc_dist(Goal_ID, now - 31, dem);
-      (dem + now - 32)->score = (dem + now - 32)->cost + calc_dist(Goal_ID, now - 32, dem);
-      (dem + now - 33)->score = (dem + now - 33)->cost + calc_dist(Goal_ID, now - 33, dem);
-      (dem + now + 31)->score = (dem + now + 31)->cost + calc_dist(Goal_ID, now + 31, dem);
-      (dem + now + 32)->score = (dem + now + 32)->cost + calc_dist(Goal_ID, now + 32, dem);
-      (dem + now + 33)->score = (dem + now + 33)->cost + calc_dist(Goal_ID, now + 33, dem);
+      break;
 
     case 4:
-      (dem + now - 1)->status = (dem + now + 1)->status = (dem + now + 31)->status = (dem + now + 32)->status = (dem + now + 33)->status = true;
+      for(i=0; i<(int)sizeof(adjacent4); i++){
+	tmp[i] = calc_cost(now, adjacent4[i], Goal_ID, dem);
+	if(tmp[i] < (dem + now + adjacent4[i])->cost){
+	  (dem + now + adjacent4[i])->status = true;
+	  (dem + now + adjacent4[i])->cost = tmp[i];
+	  (dem + now + adjacent4[i])->prev = now;
+	}
+	else ;
+      }      
 
-      (dem + now - 1)->cost = calc_edge(now, now - 1, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now + 1)->cost = calc_edge(now, now + 1, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now - 31)->cost = calc_edge(now, now - 31, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now - 32)->cost = calc_edge(now, now - 32, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now - 33)->cost = calc_edge(now, now - 33, dem) +(dem + (dem + now)->prev)->cost;
-      (dem + now + 31)->cost = calc_edge(now, now + 31, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now + 32)->cost = calc_edge(now, now + 32, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now + 33)->cost = calc_edge(now, now + 33, dem) + (dem + (dem + now)->prev)->cost;
+      tmp_node = sort_open(dem);
+      (dem + tmp_node)->prev = now; //path
+      (dem + now)->status = false; //close now node
+      now = tmp_node;
 
-      (dem + now - 1)->score = (dem + now - 1)->cost + calc_dist(Goal_ID, now - 1, dem);
-      (dem + now + 1)->score = (dem + now + 1)->cost + calc_dist(Goal_ID, now + 1, dem);
-      (dem + now - 31)->score = (dem + now - 31)->cost + calc_dist(Goal_ID, now - 31, dem);
-      (dem + now - 32)->score = (dem + now - 32)->cost + calc_dist(Goal_ID, now - 32, dem);
-      (dem + now - 33)->score = (dem + now - 33)->cost + calc_dist(Goal_ID, now - 33, dem);
-      (dem + now + 31)->score = (dem + now + 31)->cost + calc_dist(Goal_ID, now + 31, dem);
-      (dem + now + 32)->score = (dem + now + 32)->cost + calc_dist(Goal_ID, now + 32, dem);
-      (dem + now + 33)->score = (dem + now + 33)->cost + calc_dist(Goal_ID, now + 33, dem);
+      break;
 
     case 5:
-      (dem + now - 1)->status = (dem + now + 1)->status = (dem + now - 33)->status = (dem + now - 32)->status = (dem + now - 31)->status = true;
-
-      (dem + now - 1)->cost = calc_edge(now, now - 1, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now + 1)->cost = calc_edge(now, now + 1, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now - 31)->cost = calc_edge(now, now - 31, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now - 32)->cost = calc_edge(now, now - 32, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now - 33)->cost = calc_edge(now, now - 33, dem) +(dem + (dem + now)->prev)->cost;
-      (dem + now + 31)->cost = calc_edge(now, now + 31, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now + 32)->cost = calc_edge(now, now + 32, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now + 33)->cost = calc_edge(now, now + 33, dem) + (dem + (dem + now)->prev)->cost;
-
-      (dem + now - 1)->score = (dem + now - 1)->cost + calc_dist(Goal_ID, now - 1, dem);
-      (dem + now + 1)->score = (dem + now + 1)->cost + calc_dist(Goal_ID, now + 1, dem);
-      (dem + now - 31)->score = (dem + now - 31)->cost + calc_dist(Goal_ID, now - 31, dem);
-      (dem + now - 32)->score = (dem + now - 32)->cost + calc_dist(Goal_ID, now - 32, dem);
-      (dem + now - 33)->score = (dem + now - 33)->cost + calc_dist(Goal_ID, now - 33, dem);
-      (dem + now + 31)->score = (dem + now + 31)->cost + calc_dist(Goal_ID, now + 31, dem);
-      (dem + now + 32)->score = (dem + now + 32)->cost + calc_dist(Goal_ID, now + 32, dem);
-      (dem + now + 33)->score = (dem + now + 33)->cost + calc_dist(Goal_ID, now + 33, dem);
-
-    case 24:
-      (dem + now + 1)->status = (dem + now + 32)->status = (dem + now + 33)->status = true;
-
-      (dem + now - 1)->cost = calc_edge(now, now - 1, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now + 1)->cost = calc_edge(now, now + 1, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now - 31)->cost = calc_edge(now, now - 31, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now - 32)->cost = calc_edge(now, now - 32, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now - 33)->cost = calc_edge(now, now - 33, dem) +(dem + (dem + now)->prev)->cost;
-      (dem + now + 31)->cost = calc_edge(now, now + 31, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now + 32)->cost = calc_edge(now, now + 32, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now + 33)->cost = calc_edge(now, now + 33, dem) + (dem + (dem + now)->prev)->cost;
-
-      (dem + now - 1)->score = (dem + now - 1)->cost + calc_dist(Goal_ID, now - 1, dem);
-      (dem + now + 1)->score = (dem + now + 1)->cost + calc_dist(Goal_ID, now + 1, dem);
-      (dem + now - 31)->score = (dem + now - 31)->cost + calc_dist(Goal_ID, now - 31, dem);
-      (dem + now - 32)->score = (dem + now - 32)->cost + calc_dist(Goal_ID, now - 32, dem);
-      (dem + now - 33)->score = (dem + now - 33)->cost + calc_dist(Goal_ID, now - 33, dem);
-      (dem + now + 31)->score = (dem + now + 31)->cost + calc_dist(Goal_ID, now + 31, dem);
-      (dem + now + 32)->score = (dem + now + 32)->cost + calc_dist(Goal_ID, now + 32, dem);
-      (dem + now + 33)->score = (dem + now + 33)->cost + calc_dist(Goal_ID, now + 33, dem);
-
-    case 25:
-      (dem + now + 1)->status = (dem + now - 32)->status = (dem + now - 31)->status = true;
-
-      (dem + now - 1)->cost = calc_edge(now, now - 1, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now + 1)->cost = calc_edge(now, now + 1, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now - 31)->cost = calc_edge(now, now - 31, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now - 32)->cost = calc_edge(now, now - 32, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now - 33)->cost = calc_edge(now, now - 33, dem) +(dem + (dem + now)->prev)->cost;
-      (dem + now + 31)->cost = calc_edge(now, now + 31, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now + 32)->cost = calc_edge(now, now + 32, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now + 33)->cost = calc_edge(now, now + 33, dem) + (dem + (dem + now)->prev)->cost;
-
-      (dem + now - 1)->score = (dem + now - 1)->cost + calc_dist(Goal_ID, now - 1, dem);
-      (dem + now + 1)->score = (dem + now + 1)->cost + calc_dist(Goal_ID, now + 1, dem);
-      (dem + now - 31)->score = (dem + now - 31)->cost + calc_dist(Goal_ID, now - 31, dem);
-      (dem + now - 32)->score = (dem + now - 32)->cost + calc_dist(Goal_ID, now - 32, dem);
-      (dem + now - 33)->score = (dem + now - 33)->cost + calc_dist(Goal_ID, now - 33, dem);
-      (dem + now + 31)->score = (dem + now + 31)->cost + calc_dist(Goal_ID, now + 31, dem);
-      (dem + now + 32)->score = (dem + now + 32)->cost + calc_dist(Goal_ID, now + 32, dem);
-      (dem + now + 33)->score = (dem + now + 33)->cost + calc_dist(Goal_ID, now + 33, dem);
-
-    case 34:
-      (dem + now - 1)->status = (dem + now + 32)->status = (dem + now + 31)->status = true;
-
-      (dem + now - 1)->cost = calc_edge(now, now - 1, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now + 1)->cost = calc_edge(now, now + 1, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now - 31)->cost = calc_edge(now, now - 31, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now - 32)->cost = calc_edge(now, now - 32, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now - 33)->cost = calc_edge(now, now - 33, dem) +(dem + (dem + now)->prev)->cost;
-      (dem + now + 31)->cost = calc_edge(now, now + 31, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now + 32)->cost = calc_edge(now, now + 32, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now + 33)->cost = calc_edge(now, now + 33, dem) + (dem + (dem + now)->prev)->cost;
-
-      (dem + now - 1)->score = (dem + now - 1)->cost + calc_dist(Goal_ID, now - 1, dem);
-      (dem + now + 1)->score = (dem + now + 1)->cost + calc_dist(Goal_ID, now + 1, dem);
-      (dem + now - 31)->score = (dem + now - 31)->cost + calc_dist(Goal_ID, now - 31, dem);
-      (dem + now - 32)->score = (dem + now - 32)->cost + calc_dist(Goal_ID, now - 32, dem);
-      (dem + now - 33)->score = (dem + now - 33)->cost + calc_dist(Goal_ID, now - 33, dem);
-      (dem + now + 31)->score = (dem + now + 31)->cost + calc_dist(Goal_ID, now + 31, dem);
-      (dem + now + 32)->score = (dem + now + 32)->cost + calc_dist(Goal_ID, now + 32, dem);
-      (dem + now + 33)->score = (dem + now + 33)->cost + calc_dist(Goal_ID, now + 33, dem);
-
-    case 35:
-      (dem + now - 1)->status = (dem + now - 32)->status = (dem + now - 33)->status = true;
-
-      (dem + now - 1)->cost = calc_edge(now, now - 1, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now + 1)->cost = calc_edge(now, now + 1, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now - 31)->cost = calc_edge(now, now - 31, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now - 32)->cost = calc_edge(now, now - 32, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now - 33)->cost = calc_edge(now, now - 33, dem) +(dem + (dem + now)->prev)->cost;
-      (dem + now + 31)->cost = calc_edge(now, now + 31, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now + 32)->cost = calc_edge(now, now + 32, dem) + (dem + (dem + now)->prev)->cost;
-      (dem + now + 33)->cost = calc_edge(now, now + 33, dem) + (dem + (dem + now)->prev)->cost;
-
-      (dem + now - 1)->score = (dem + now - 1)->cost + calc_dist(Goal_ID, now - 1, dem);
-      (dem + now + 1)->score = (dem + now + 1)->cost + calc_dist(Goal_ID, now + 1, dem);
-      (dem + now - 31)->score = (dem + now - 31)->cost + calc_dist(Goal_ID, now - 31, dem);
-      (dem + now - 32)->score = (dem + now - 32)->cost + calc_dist(Goal_ID, now - 32, dem);
-      (dem + now - 33)->score = (dem + now - 33)->cost + calc_dist(Goal_ID, now - 33, dem);
-      (dem + now + 31)->score = (dem + now + 31)->cost + calc_dist(Goal_ID, now + 31, dem);
-      (dem + now + 32)->score = (dem + now + 32)->cost + calc_dist(Goal_ID, now + 32, dem);
-      (dem + now + 33)->score = (dem + now + 33)->cost + calc_dist(Goal_ID, now + 33, dem);
-    }
-
-    //-------------------
-    // +33    +32    +31
-    // +1     now    -1
-    // -31    -32    -33
-    //-------------------
-    /*   for(j=0;j<8;j++){
-      if(j==0)
-        next = now - 1;
-      else if(j==1)
-        next = now + 1;
-      else if(j==2)
-        next = now + 32;
-      else if(j==3)
-        next = now + 31;
-      else if(j==4)
-        next = now + 33;
-      else if(j==5)
-        next = now - 32;
-      else if(j==6)
-        next = now - 31;
-      else if(j==7)
-        next = now - 33;
-      if (next<0 || next>511)
-        continue;
-      if((dem + next)->flag==false)
-        continue;
-      tmp = calc_edge(now, next, dem);
-      
-      if(cost[now] + tmp < cost[next]){
-	//printf("%d\t%f\t%f\t%f\n",j,cost[now],tmp,cost[next]);
-        cost[next] = cost[now] + tmp;
-        prev[next] = now;
-	if(cost[next] < min){
-	  min = cost[next];
-	  tmp_next = next;
+      for(i=0; i<(int)sizeof(adjacent5); i++){
+	tmp[i] = calc_cost(now, adjacent5[i], Goal_ID, dem);
+	if(tmp[i] < (dem + now + adjacent5[i])->cost){
+	  (dem + now + adjacent5[i])->status = true;
+	  (dem + now + adjacent5[i])->cost = tmp[i];
+	  (dem + now + adjacent5[i])->prev = now;
 	}
+	else ;
       }
       
+      tmp_node = sort_open(dem);
+      (dem + tmp_node)->prev = now; //path
+      (dem + now)->status = false; //close now node
+      now = tmp_node; 
+
+      break;
+
+    case 24:
+      for(i=0; i<(int)sizeof(adjacent24); i++){
+	tmp[i] = calc_cost(now, adjacent24[i], Goal_ID, dem);
+	if(tmp[i] < (dem + now + adjacent24[i])->cost){
+	  (dem + now + adjacent24[i])->status = true;
+	  (dem + now + adjacent24[i])->cost = tmp[i];
+	  (dem + now + adjacent24[i])->prev = now;
+	}
+	else ;
+      }      
+
+      tmp_node = sort_open(dem);
+      (dem + tmp_node)->prev = now; //path
+      (dem + now)->status = false; //close now node
+      now = tmp_node;  
+
+      break;
+
+    case 25:
+      for(i=0; i<(int)sizeof(adjacent25); i++){
+	tmp[i] = calc_cost(now, adjacent25[i], Goal_ID, dem);
+	if(tmp[i] < (dem + now + adjacent25[i])->cost){
+	  (dem + now + adjacent25[i])->status = true;
+	  (dem + now + adjacent25[i])->cost = tmp[i];
+	  (dem + now + adjacent25[i])->prev = now;
+	}
+	else ;
+      }
+      
+      tmp_node = sort_open(dem);
+      (dem + tmp_node)->prev = now; //path
+      (dem + now)->status = false; //close now node
+      now = tmp_node;
+      
+      break;
+
+    case 34:
+      for(i=0; i<(int)sizeof(adjacent34); i++){
+	tmp[i] = calc_cost(now, adjacent34[i], Goal_ID, dem);
+	if(tmp[i] < (dem + now + adjacent34[i])->cost){
+	  (dem + now + adjacent34[i])->status = true;
+	  (dem + now + adjacent34[i])->cost = tmp[i];
+	  (dem + now + adjacent34[i])->prev = now;
+	}
+	else ;
+      }
+      
+      tmp_node = sort_open(dem);
+      (dem + tmp_node)->prev = now; //path
+      (dem + now)->status = false; //close now node
+      now = tmp_node; 
+
+      break;
+
+    case 35:
+      for(i=0; i<(int)sizeof(adjacent35); i++){
+	tmp[i] = calc_cost(now, adjacent35[i], Goal_ID, dem);
+	if(tmp[i] < (dem + now + adjacent35[i])->cost){
+	  (dem + now + adjacent35[i])->status = true;
+	  (dem + now + adjacent35[i])->cost = tmp[i];
+	  (dem + now + adjacent35[i])->prev = now;
+	}
+	else ;
+      }
+      
+      tmp_node = sort_open(dem);
+      (dem + tmp_node)->prev = now; //path
+      (dem + now)->status = false; //close now node
+      now = tmp_node;
+
+      break;
     }
-    if(now == tmp_next ){
-      printf("%d\n",now);
-      printf("path plan is failed\n");
-      exit(0);
-    }
-    prev[tmp_next] = now;
-    now = tmp_next;
-    printf("now:%d\n",now);
-  } 
-   i = Goal_ID;
-  //get path node 
-  do{
-    printf("iの前は%d\n",prev[i]);
-    i = prev[i];
-  }while(i != 512);
-    */  
   }
+   
+  goal_path = now;
+  i=0;
+  do{
+    printf("%d\n",goal_path);
+    goal_path = (dem + goal_path)->prev;
+    i++;
+    if(i>10)
+      break;
+  }while(goal_path != 512);
+  
 }
 
 float calc_dist(int a ,int b,DEM *dem){
@@ -341,19 +275,23 @@ float calc_edge(int a ,int b,DEM *dem){
   
 }
 
-
-int min_node(int a, int b, int c, int d, int e, int f, int g, int h, DEM *dem){
-  int i;
-  float min=12345;
-  int array[8]={a, b, c, d, e, f, g, h};
-  int tmp;
-
-  for(i=0; i<8; i++){
-    if((dem+array[i])->score < min){
-      min = (dem + array[i])->score;
-      tmp = array[i];
-    }
-  }
-  return tmp;
+float calc_cost(int now, int adjacent, int Goal_ID, DEM *dem){
+  float cost;
+  cost = calc_edge(now, now + adjacent, dem) //cost between 2 nodes
+    + (dem + now)->cost //minimum cost untill now
+    - calc_dist(Goal_ID, now, dem) //now's heuristic function  
+    + calc_dist(Goal_ID, now + adjacent, dem); //adjacent's heuristic function
+  return cost;
 }
 
+int sort_open(DEM *dem){
+  int i, num;
+  float min = 12345678; 
+  for(i=0; i<512; i++){
+    if((dem + i)->status == true && (dem + i)->cost < min){
+      min = (dem + i)->cost;
+      num = i;
+    }
+  }
+  return num;
+}

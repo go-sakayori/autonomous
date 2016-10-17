@@ -48,6 +48,7 @@ int create_grid(int Point_Num, DEM *dem){
       (dem + i * 32 + j)->y = INTERVAL / 2 + (j-16) * INTERVAL;
       (dem + i * 32 + j)->z = 0.0;
       (dem + i * 32 + j)->flag = 1;
+      (dem + i * 32 + j)->cost = 12345678;
     }
   }
   
@@ -172,6 +173,7 @@ int create_grid(int Point_Num, DEM *dem){
       }
       else ;
   }
+  printf("OK");
     return 0;      
 }
   
