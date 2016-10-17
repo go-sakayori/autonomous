@@ -53,19 +53,18 @@ int create_grid(int Point_Num, DEM *dem){
   
   for(i = 0; i < Point_Num; i++){
     tmp_x =   vertex[i][0] / INTERVAL;
-    tmp_y =   vertex[i][1] / INTERVAL - 1;
-    // printf("%d,%d\t",tmp_x,tmp_y);
+    tmp_y =   vertex[i][1] / INTERVAL;
+    if(vertex[i][1]<0)
+      tmp_y = tmp_y - 1;
+    //  printf("%d,%d\t",tmp_x,tmp_y);
     dem_ID =  16 + tmp_y + tmp_x * 32;
-    printf("%d\t",dem_ID);
+    //  printf("%d\t",dem_ID);
     if(fabs((dem + dem_ID)->z) < fabs(vertex[i][2])) //gets the maximum height (absolute) in the area
       (dem + dem_ID)->z = vertex[i][2];
   }
-
-  // when there is no point cloud in a grid
-  for(i=0;i<GRID_NUM;i++){
-    if((dem + i)->z==0.0)
-      (dem + i)->flag = false;
-  }
+  printf("grid map ok\n");
+ 
+  
   //printf("%f\n", (dem + 29)->z);
 
   //printf("ok\n");
@@ -77,36 +76,36 @@ int create_grid(int Point_Num, DEM *dem){
   //----------------------
   j = 0;
   for(i = 0; i < GRID_NUM; i++){
-    if(fabs((dem + i)->z) > DEM_H || (dem + i)->z == 0.0){
+    if(fabs((dem + i)->z) > DEM_H || (dem + i)->z == 0.0){      //exclude dem over DEM_H or when there is no point cloud in a grid
       j++;
       (dem + i)->flag = false;
       if(i % 32 ==0){ //right area
-        (dem + 1)->flag = false;
+        (dem + i + 1)->flag = false;
         if(i / 32 == 0) //bottom area
-          (dem + 32)->flag = false;
+          (dem + i + 32)->flag = false;
         else if(i / 32 == 15) //top area
-          (dem - 32)->flag = false;
+          (dem + i - 32)->flag = false;
         else{
-          (dem + 32)->flag = false;
-          (dem - 32)->flag = false;
+          (dem + i + 32)->flag = false;
+          (dem + i - 32)->flag = false;
         }
       }
       else if (i % 32 == 31){//left area
-        (dem - 1)->flag = false;
+        (dem + i - 1)->flag = false;
         if(i / 32 == 0) //bottom area
-          (dem + 32)->flag = false;
+          (dem + i + 32)->flag = false;
         else if(i / 32 == 15) //top area
-          (dem - 32)->flag = false;
+          (dem + i - 32)->flag = false;
         else{
-          (dem + 32)->flag = false;
-          (dem - 32)->flag = false;
+          (dem + i + 32)->flag = false;
+          (dem + i - 32)->flag = false;
         }
       }
       else{
-        (dem - 1)->flag = false;	
-        (dem + 1)->flag = false;	
-        (dem - 32)->flag = false;	
-        (dem + 32)->flag = false;	
+        (dem + i - 1)->flag = false;	
+        (dem + i + 1)->flag = false;	
+        (dem + i - 32)->flag = false;	
+        (dem + i + 32)->flag = false;	
       }
     }
     else ;

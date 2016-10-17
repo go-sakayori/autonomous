@@ -8,7 +8,7 @@
 #define INTERVAL 0.50
 #define GRID_NUM 512
 #define H_LIMIT 1
-#define DEM_H 0.05
+#define DEM_H 0.1
 
 typedef struct{
   float x;
