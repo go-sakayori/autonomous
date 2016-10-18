@@ -42,6 +42,8 @@ int main(){
     else
       printf("%d",(dem + i)->flag);
   */
+
+  //free memory
   free(dem);
   return 0;
 }
