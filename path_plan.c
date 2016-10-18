@@ -14,7 +14,7 @@ int get_goal(DEM *dem){
   
 }
 
-void pathplan(int Goal_ID, DEM * dem){
+int pathplan(int Goal_ID, DEM * dem){
   int adjacent1[8]={-33, -32, -31, -1, 1, 31, 32, 33};
   int adjacent2[5]={-32, -31, 1, 32, 33};
   int adjacent3[5]={-33, -32, -1, 31, 32};
@@ -202,14 +202,15 @@ void pathplan(int Goal_ID, DEM * dem){
       break;
     }
   }
- 
+  i = 0;
   goal_path = now;
   do{
     printf("%d\n",goal_path);
     (dem + goal_path)->flag = 6;
     goal_path = (dem + goal_path)->prev;
+    i++;
   }while(goal_path != 512);
-  
+  return i;
 }
 
 float calc_dist(int a ,int b, DEM *dem){

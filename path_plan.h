@@ -10,8 +10,7 @@
 extern int PATH[100];
 
 int get_goal(DEM *);
-
-void pathplan(int,DEM *);
+int pathplan(int,DEM *);
 
 float calc_dist(int,int,DEM *);
 float calc_elev(int,int,DEM *);

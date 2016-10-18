@@ -1,70 +1,61 @@
 #include "grid_map.h"
-
-int read_data(){
-
-  int i=0;
-  FILE *fp;
-  float x0, y0, z0;
-
-
-  if((fp = fopen("data3D.txt","r")) == NULL){
-    printf("File not found\n");
-    exit(0);
-  }
-  
-  while(feof(fp)==0){
-    fscanf(fp,"%f\t%f\t%f",&x0, &y0, &z0);
-    if(fabs(z0) < H_LIMIT && x0 >= 0 && x0 < 8 && fabs(y0) < 8){
-      vertex[i][0] = x0;
-      vertex[i][1] = y0;
-      vertex[i][2] = z0 + lrf_heigt;
-      i++;
-    }
-  }
-  fclose(fp);
-  //feofが一行多く読み込んでしまう．最後の行でx0が負の時，Point_Numに影響がでる
-  if(x0 > 0)
-    return i-1;
-  else
-    return i;
-}
- 
-
-int create_grid(int Point_Num, DEM *dem){
-  int i, j;
+void create_grid(int point_num, DEM *dem, Map map){
+  int i, j, k = 0;
   int tmp_x,tmp_y;
   int dem_ID;
 
-  //----------------
-  //            x,i=15
-  //             |
-  //             | 
-  //             |
-  // y,j=31 -----0-----------j=0
-  //--------------
+  //allocate memory for point cloud data
+  float *vertex;
+  vertex = (float*)malloc(sizeof(float) * point_num * 3);
+
+  float tmp[3];
+  FILE *fp;
   
-  for(i = 0; i < 16; i++){
-    for(j = 0; j < 32; j++){
-      (dem + i * 32 + j)->x = INTERVAL / 2 + i * INTERVAL;
-      (dem + i * 32 + j)->y = INTERVAL / 2 + (j-16) * INTERVAL;
+  //initialize dem data
+  for(i = 0; i < map.row; i++){
+    for(j = 0; j < map.column; j++){
+      (dem + i * 32 + j)->x = map.interval / 2 + i * map.interval;
+      (dem + i * 32 + j)->y = map.interval / 2 + (j-16) * map.interval;
       (dem + i * 32 + j)->z = 0.0;
       (dem + i * 32 + j)->flag = 1;
       (dem + i * 32 + j)->status = 2;
       (dem + i * 32 + j)->cost = 999;
     }
   }
-  
-  for(i = 0; i < Point_Num; i++){
-    tmp_x =   vertex[i][0] / INTERVAL;
-    tmp_y =   vertex[i][1] / INTERVAL;
-    if(vertex[i][1]<0)
-      tmp_y = tmp_y - 1;
-    //  printf("%d,%d\t",tmp_x,tmp_y);
-    dem_ID =  16 + tmp_y + tmp_x * 32;
-    //  printf("%d\t",dem_ID);
-    if(fabs((dem + dem_ID)->z) < fabs(vertex[i][2])) //gets the maximum height (absolute) in the area
-      (dem + dem_ID)->z = vertex[i][2];
+
+  //read point cloud data from txt data
+  if((fp = fopen("data3D.txt","r")) == NULL){
+    printf("File not found\n");
+    exit(0);
   }
+
+  for(i=0; i<point_num; i++){
+    fscanf(fp,"%f\t%f\t%f",&tmp[0], &tmp[1], &tmp[2]);
+    if(tmp[0] >= 0 && tmp[0] <8 && fabs(tmp[1]) < 8 && fabs(tmp[2]) < map.threshold){
+      vertex[i * 3 + 0] = tmp[0];
+      vertex[i * 3 + 1] = tmp[1];
+      vertex[i * 3 + 2] = tmp[2] + lrf_heigt;
+      k++;
+    }
+  }
+  printf("%d\n",k);
+  fclose(fp);
+  
+  //place maximum (or minimum) height to the gird
+  for(i=0; i<point_num; i++){
+    tmp_x = vertex[i * 3 + 0] / map.interval;
+    tmp_y = vertex[i * 3 + 1] / map.interval;
+    if(vertex[i * 3 + 1]<0)
+      tmp_y = tmp_y - 1;
+    dem_ID =  16 + tmp_y + tmp_x * 32;
+
+    if(fabs((dem + dem_ID)->z) < fabs(vertex[i * 3 + 2]))
+      (dem + dem_ID)->z = vertex[i * 3 + 2];
+  }
+
+  //memory release
+  free(vertex);
+
   printf("grid map ok\n");
  
   
@@ -78,13 +69,13 @@ int create_grid(int Point_Num, DEM *dem){
   //        i-32
   //----------------------
 
-  for(i = 0; i < GRID_NUM; i++){
-    if(i % 32 == 0){//right area
-      if(i / 32 == 0){ //bottom area
+  for(i = 0; i < map.point; i++){
+    if(i % map.column == 0){//right area
+      if(i / map.column == 0){ //bottom area
 	if(fabs((dem + i)->z) > DEM_H || (dem + i)->z == 0.0){
 	  (dem + i)->flag = 0;
 	  (dem + i + 1)->flag = 0;
-	  (dem + i + 32)->flag = 0;
+	  (dem + i + map.column)->flag = 0;
 	}
 	else 
 	  (dem + i)->flag = 24;
@@ -176,6 +167,5 @@ int create_grid(int Point_Num, DEM *dem){
       else ;
     }
   }
-  return 0;      
 }
   
