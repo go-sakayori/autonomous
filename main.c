@@ -1,10 +1,13 @@
 #include "common.h"
 #include "grid_map.h"
 #include "path_plan.h"
+#include "scan.h"
 #include <stdio.h>
 #include <stdlib.h>
 
 int main(){
+
+
 
   //set up map information
   Map map; 
@@ -17,33 +20,34 @@ int main(){
 
   //memory allocation for dem data
   DEM *dem;
-  dem = (DEM*)malloc(sizeof(DEM) * 513);
+  dem = (DEM*)malloc(sizeof(DEM) * (map.point + 1)); //+1 add start node
   
-  int i=0, point_num = 176656;
+  int i, point_num = 176656;
   int node_num;
 
   create_grid(point_num, dem, map);
-  // printf("%d\n",Num_ex_dem);
- 
-  /*if(Num_ex_dem>300)
-    Num_ex_dem = create_grid(Point_Num,dem_h_limit+0.1);
-  if(Num_ex_dem>300){
-    printf("can not traverse, back and rescan \n");
-    exit(1);
-    }*/
-  //printf("%d\n",Num_ex_dem);
 
+  //path planning
   Goal_ID = get_goal(dem);
-  node_num = pathplan(Goal_ID,dem);  
-  /*printf("\n passed node:%d\n",node_num);
-  for(i=511;i>=0;i--)
+  node_num = pathplan(Goal_ID, dem, map);  
+  //printf("\n passed node:%d\n",node_num);
+  /*for(i=511;i>=0;i--)
     if(i % 32==0)
       printf("%d\n",(dem + i)->flag);
     else
       printf("%d",(dem + i)->flag);
   */
 
+  //create motion table
+  int *motion;
+  motion = (int*)malloc(sizeof(int) * node_num);
+  create_motion(Goal_ID, dem, motion, node_num, map.column);
+
+  //for(i=0; i<node_num; i++)
+  //  printf("%d\n",motion[i]);
+
   //free memory
   free(dem);
+
   return 0;
 }

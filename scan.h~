@@ -1,0 +1,9 @@
+#ifndef SCAN_H
+#define SCAN_H
+
+#include <signal.h>
+#include <pthread.h>
+
+void scan_terrain();
+
+#endif SCAN_H

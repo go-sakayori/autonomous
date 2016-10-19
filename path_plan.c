@@ -14,16 +14,16 @@ int get_goal(DEM *dem){
   
 }
 
-int pathplan(int Goal_ID, DEM * dem){
-  int adjacent1[8]={-33, -32, -31, -1, 1, 31, 32, 33};
-  int adjacent2[5]={-32, -31, 1, 32, 33};
-  int adjacent3[5]={-33, -32, -1, 31, 32};
-  int adjacent4[5]={-1, 1, 31, 32, 33};
-  int adjacent5[5]={-1, 1, -31, -32, -33};
-  int adjacent24[3]={1, 32, 33};
-  int adjacent25[3]={1, -31, -32};
-  int adjacent34[3]={-1, 31, 32};
-  int adjacent35[3]={-1, -32, -33};
+int pathplan(int Goal_ID, DEM * dem, Map map){
+  int adjacent1[8]={-map.column-1, -map.column, -map.column+1, -1, 1, map.column-1, map.column, map.column+1};
+  int adjacent2[5]={-map.column, -map.column+1, 1, map.column, map.column+1};
+  int adjacent3[5]={-map.column-1, -map.column, -1, map.column-1, map.column};
+  int adjacent4[5]={-1, 1, map.column-1, map.column, map.column+1};
+  int adjacent5[5]={-1, 1, -map.column+1, -map.column, -map.column-1};
+  int adjacent24[3]={1, map.column, map.column+1};
+  int adjacent25[3]={1, -map.column-1, -map.column};
+  int adjacent34[3]={-1, map.column-1, map.column};
+  int adjacent35[3]={-1, -map.column, -map.column-1};
 
   int i, a, n = 0;
   float tmp[8];
@@ -38,31 +38,31 @@ int pathplan(int Goal_ID, DEM * dem){
   (dem + 512)->status = 1; //open start node
   
   //check near node from start
-  if((dem + 15)->flag != 0){
-    (dem + 15)->status = 1; //open node
-    (dem + 15)->cost = calc_edge(512, 15, dem) + calc_dist(15, Goal_ID, dem);
+  if((dem + map.row - 1)->flag != 0){
+    (dem + map.row - 1)->status = 1; //open node
+    (dem + map.row - 1)->cost = calc_edge(512, map.row - 1, dem) + calc_dist(map.row - 1, Goal_ID, dem);
   }
 
-  if((dem + 16)->flag != 0){
-    (dem + 15)->status = 1; //open node
-    (dem + 16)->cost = calc_edge(512, 16, dem) + calc_dist(16, Goal_ID, dem);
+  if((dem + map.row)->flag != 0){
+    (dem + map.row)->status = 1; //open node
+    (dem + map.row)->cost = calc_edge(512, map.row, dem) + calc_dist(1, Goal_ID, dem);
      }
 
- if((dem + 16)->flag == 0 && (dem + 16)->flag == 0)
+ if((dem + map.row - 1)->flag == 0 && (dem + map.row)->flag == 0)
     printf("Cannnot move from start position");
 
-  if((dem + 15)->cost < (dem + 16)->cost){
-    now = 15;
+  if((dem + map.row - 1)->cost < (dem + map.row)->cost){
+    now = map.row - 1;
     (dem + now)->prev = 512;
   }
   else{
-    now = 16;
+    now = map.row;
     (dem + now)->prev = 512;
   }
   (dem + 512)->status = 0; //close start node  
   
   while( now != Goal_ID ){
-    now = sort_open(dem);
+    now = sort_open(dem, map.point);
     (dem + now)->status = 0; //close now node
     a = (dem + now)->flag;
     
@@ -205,12 +205,58 @@ int pathplan(int Goal_ID, DEM * dem){
   i = 0;
   goal_path = now;
   do{
-    printf("%d\n",goal_path);
-    (dem + goal_path)->flag = 6;
+    //printf("%d\n",goal_path);
     goal_path = (dem + goal_path)->prev;
     i++;
   }while(goal_path != 512);
+ 
   return i;
+}
+
+void create_motion(int Goal_ID, DEM *dem, int *motion, int size, int column){
+
+  //////variable for motion table
+  //   forward
+  // 
+  //  0   1   2
+  //  3 robot 4
+  //  5   6   7
+  //
+  // 8 for start to 15
+  // 9 for start to 16
+  //////
+  int i;
+  int tmp;
+  int now = Goal_ID; 
+
+  for(i=size-1; i >0; i--){
+    tmp = now - (dem + now)->prev;
+    now = (dem + now) -> prev;
+    if(tmp == column + 1)
+      motion[i] = 0;
+    else if(tmp == column)
+      motion[i] = 1;
+    else if(tmp == column -1)
+      motion[i] = 2;
+    else if(tmp == 1)
+      motion[i] = 3;
+    else if(tmp == -1)
+      motion[i] = 4;
+    else if(tmp == 1 - column)
+      motion[i] = 5;
+    else if(tmp == -column)      
+      motion[i] = 6;
+    else if (tmp == -column - 1)
+      motion[i] = 7;
+    else
+      printf("motion table not working\n");
+  }
+  if(now == column / 2 -1)
+    motion[0] = 8;
+  else if(now == column / 2)
+    motion[0] = 9;
+  else
+    printf("motion table not working\n");
 }
 
 float calc_dist(int a ,int b, DEM *dem){
@@ -250,10 +296,10 @@ float calc_cost(int now, int adjacent, int Goal_ID, DEM *dem){
   return cost;
 }
 
-int sort_open(DEM *dem){
+int sort_open(DEM *dem, int grid_num){
   int i, num;
   float min = 12345678; 
-  for(i=0; i<512; i++){
+  for(i=0; i<grid_num; i++){
     if((dem + i)->status == 1 && (dem + i)->cost < min){
       min = (dem + i)->cost;
       num = i;

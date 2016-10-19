@@ -10,12 +10,13 @@
 extern int PATH[100];
 
 int get_goal(DEM *);
-int pathplan(int,DEM *);
+int pathplan(int,DEM *, Map);
+void create_motion(int, DEM *, int *, int, int);
 
 float calc_dist(int,int,DEM *);
 float calc_elev(int,int,DEM *);
 float calc_edge(int,int,DEM *);
 float calc_cost(int, int, int, DEM *);
-int sort_open(DEM *);
+int sort_open(DEM *, int);
 
 #endif
