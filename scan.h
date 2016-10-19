@@ -8,9 +8,11 @@
 #include <sys/types.h>      // for open 
 #include <sys/stat.h>       // for open
 #include <fcntl.h>          // for open
+#include <sys/ioctl.h>      // for ioctl
 
 #include "driver/urbtc.h"
 #include "driver/urobotc.h"
+
 
 void scan_terrain();
 

@@ -33,6 +33,7 @@ void scan_terrain(){
       exit(1);
     }
 
+  //urg_3d(fds, obuf);
 
   close(fd);
 }
